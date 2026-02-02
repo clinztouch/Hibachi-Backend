@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HibachiApp</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    .message {
+      font-size: 1.2rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Email Verification</h1>
+  <div id="message" class="message">Verifying...</div>
+  <div id="globalSpinner" class="spinner hidden"></div>
+
+  <script type="module">
+    import { API_BASE } from './config.js';
+    import { showSpinner, hideSpinner } from './modules/spinner.js';
+
+    async function verifyEmail() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const messageEl = document.getElementById('message');
+
+      if (!token) {
+        messageEl.textContent = 'Invalid verification link.';
+        return;
+      }
+
+      try {
+        showSpinner();
+        const res = await fetch(`${API_BASE}/api/auth/verify?token=${token}`);
+        const data = await res.json();
+        hideSpinner();
+
+        if (!res.ok) {
+          messageEl.textContent = data.message || 'Verification failed.';
+          return;
+        }
+
+        messageEl.textContent = '✅ Email verified successfully! Redirecting to login...';
+        setTimeout(() => window.location.href = '/', 3000);
+      } catch (err) {
+        hideSpinner();
+        messageEl.textContent = ' Something went wrong. Try again later.';
+      }
+    }
+
+    verifyEmail();
+  </script>
+</body>
+</html>
